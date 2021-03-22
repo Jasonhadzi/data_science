@@ -1,0 +1,56 @@
+-- find the most popular Hacker News stories:
+SELECT title, score
+FROM hacker_news
+ORDER BY score DESC
+LIMIT 5;
+
+-- find the total score of all the stories.
+select sum(score) as 'total score'
+from hacker_news;
+
+--Find the individual users who have gotten combined scores of more than 200, and their combined scores.
+select user, sum(score)
+from  hacker_news
+group by user
+having sum(score) > 200
+order by 2 desc;
+
+-- Add their scores together and divide it by the total sum
+select round((517 + 309 + 304 + 282) / 6366.0 *100.0 ,2) as 'percentage';
+
+-- How many times has each offending user posted this link?
+select user, count(*)
+from  hacker_news
+where url like '%watch?v=dQw4w9WgXcQ%'
+group by 1
+order by 2;
+
+-- Which of these sites feed Hacker News the most: GitHub, Medium, or New York Times?
+--Add a column for the number of stories from each URL using COUNT()
+
+select case
+    when url like '%github%' then 'Github'
+    when url like '%medium%' then 'Medium'
+    when url like '%nytimes%' then 'New York Times'
+    else 'Other'
+  end as 'source',
+  count(*)
+from hacker_news
+group by 1;
+
+-- What’s the best time of the day to post a story on Hacker News?
+SELECT strftime('%H',timestamp), count(*)
+FROM hacker_news
+Group by 1
+order by 2 desc;
+
+--write a query that returns three columns:
+--The hours of the timestamp
+--The average score for each hour
+--The count of stories for each hour
+
+select strftime('%H', timestamp) as 'hour', round(avg(score),2) as 'score', count(*) as 'count'
+from hacker_news
+where score IS not null
+group by 1
+order by 2;
