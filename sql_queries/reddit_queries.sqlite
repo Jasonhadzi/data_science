@@ -1,0 +1,75 @@
+SELECT *
+FROM users
+LIMIT 10;
+
+SELECT *
+FROM posts
+LIMIT 10;
+
+SELECT *
+FROM subreddits
+LIMIT 10;
+
+-- Write a query to count how many different subreddits there are.
+select count(*)
+from  subreddits;
+
+--What user has the highest score?
+select username, max(score)
+from users;
+What post has the highest score?
+select title, max(score)
+from posts;
+
+--What are the top 5 subreddits with the highest subscriber_count?
+SELECT name
+FROM subreddits
+ORDER BY subscriber_count
+LIMIT 5;
+
+-- Use a LEFT JOIN with the users and posts tables to find out how many posts each user has made.
+select users.username, count(*)
+from users
+left join posts
+  on posts.user_id = users.id
+where users.username is not null
+group by users.username
+order by 2 desc;
+
+--We only want to see existing posts where the users are still active, so use an INNER JOIN to write a query to get these posts. Have the posts table as the left table.
+
+select *
+from posts
+join users
+  on posts.user_id = users.id
+
+-- tack the new posts2 table under the existing posts table to see them.
+
+select *
+from posts2
+union
+select *
+from  posts;
+
+--find out which subreddits have the most popular posts. We’ll say that a post is popular if it has a score of at least 5000.
+
+WITH popular_posts AS (
+  select *
+  from posts
+  where score >= 5000
+)
+select subreddits.name, popular_posts.title, popular_posts.score
+from subreddits
+join popular_posts
+  on subreddits.id = popular_posts.subreddit_id
+order by 3 desc;
+
+-- write a query to calculate the average score of all the posts for each subreddit.
+
+
+select subreddits.name, round(avg(posts.score)) as 'average score'
+from subreddits
+join posts
+  on subreddits.id = posts.subreddit_id
+group by 1
+order by 2 desc;
