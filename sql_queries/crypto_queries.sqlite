@@ -1,0 +1,30 @@
+SELECT *
+FROM transactions
+LIMIT 5;
+
+-- What is the total money_in in the table?
+select sum(money_out)
+from transactions
+
+-- How many money_in transactions are in this table?
+select count(money_in)
+from transactions;
+
+-- How many money_in transactions are in this table where ‘BIT’ is the currency?
+select count(money_in)
+from transactions
+where currency = 'BIT';
+
+--What was the largest transaction in this whole table?
+select max(money_in), max(money_out)
+from transactions;
+
+-- What is the average money_in in the table for the currency Ethereum (‘ETH’)?
+select round(avg(money_in))
+from transactions
+where currency = 'ETH';
+
+-- Let’s build a ledger for the different dates.
+select date, round(avg(money_in),2) as 'avg money in', round(avg(money_out),2) as 'avg money out'
+from transactions
+group by 1;

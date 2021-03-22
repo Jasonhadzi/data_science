@@ -1,0 +1,56 @@
+SELECT *
+FROM places;
+
+SELECT *
+FROM reviews;
+
+-- If each dollar sign ($) represents $10, how could you find all places that cost $20 or less?
+select *
+from places
+where price_point = '$'
+  OR price_point = '$$';
+
+
+--Write a query to do an INNER JOIN on the two tables to show all reviews for restaurants that have at least one review.
+
+select places.name, places.average_rating, reviews.username, reviews.rating, reviews.review_date, reviews.note
+from places
+join reviews
+  on places.id = reviews.place_id;
+
+-- write a query to do a LEFT JOIN on the tables, selecting the same columns as the previous question.
+
+select places.name, places.average_rating, reviews.username, reviews.rating, reviews.review_date, reviews.note
+from places
+left join reviews
+  on places.id = reviews.place_id;
+
+--Write a query to find all the ids of places that currently do not have any reviews in our reviews table.
+
+select places.id, places.name
+from places
+left join reviews
+  on places.id = reviews.place_id
+where reviews.place_id is null;
+
+-- Write a query using the WITH clause to select all the reviews that happened in 2020. JOIN the places to your WITH query to see a log of all reviews from 2020.
+
+WITH old_reviews AS (
+  SELECT *
+  FROM reviews
+  WHERE strftime("%Y" ,review_date) = '2020'
+)
+SELECT *
+FROM places
+JOIN old_reviews
+  ON old_reviews.place_id = places.id;
+
+-- Write a query that finds the reviewer with the most reviews that are BELOW the average rating for places.
+
+select reviews.username, count(*)
+from places
+join reviews
+  on places.id = reviews.place_id
+where reviews.rating < places.average_rating
+group by 1
+order by 2 desc;
