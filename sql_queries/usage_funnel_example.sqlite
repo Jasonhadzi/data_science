@@ -1,0 +1,39 @@
+select *
+from survey
+limit 10;
+
+-- What is the number of responses for each question?
+select question, count(distinct user_id) as 'funnel'
+from survey
+group by 1;
+
+select *
+from quiz
+limit 5;
+
+select *
+from home_try_on
+limit 5;
+
+select *
+from purchase
+limit 5;
+
+
+WITH funnel  as (select q.user_id,
+ h.user_id is not null as 'is_home_try_on',
+ h.number_of_pairs,
+ p.user_id is not null as 'is_purchase'
+from quiz as 'q'
+left join home_try_on as 'h'
+ on q.user_id = h.user_id
+left join purchase as 'p'
+ on h.user_id = p.user_id
+)
+select
+ number_of_pairs,
+ count(*) as 'total',
+ sum(is_home_try_on) as 'tried_at_home',
+ sum(is_purchase) as 'purchased'
+from funnel
+group by 1;
