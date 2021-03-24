@@ -1,0 +1,84 @@
+SELECT *
+FROM state_climate
+limit 5;
+
+-- Write a query that returns the state, year, tempf or tempc, and running_avg_temp (in either Celsius or Fahrenheit) for each state.
+
+SELECT state, year, tempc,
+  AVG(tempc) OVER(
+    PARTITION BY state
+    ORDER BY year
+  ) as running_avg_temp
+FROM state_climate;
+
+-- Now let’s explore the lowest temperatures for each state
+SELECT state, year, tempc,
+  FIRST_VALUE(tempc) OVER (
+    PARTITION BY state
+    ORDER BY year
+  ) as lowest_temp
+FROM state_climate;
+
+-- Now let’s explore the highest temperatures for each state
+SELECT state, year, tempc,
+  LAST_VALUE(tempc) OVER (
+    PARTITION BY state
+    ORDER BY year
+    RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+  ) as highest_temp
+FROM state_climate;
+
+
+-- Let’s see how temperature has changed each year in each state.
+-- Write a query to select the same columns but now you should write a window function that returns the change_in_temp from the previous year (no null values should be returned).
+
+SELECT state, year, tempc,
+  tempc - LAG(tempc,1, tempc) OVER (
+    PARTITION BY state
+    ORDER BY year
+  ) as change_in_temp
+FROM state_climate
+ORDER BY change_in_temp DESC;
+
+-- Write a query to return a rank of the coldest temperatures on record (coldest_rank) along with year, state, and tempf or tempc. Are the coldest ranked years recent or historic? The coldest years should be from any state or year.
+
+SELECT state, year, tempc,
+  RANK() OVER (
+    ORDER BY tempc ASC
+  ) as 'coldest_rank'
+FROM state_climate;
+
+-- Modify your coldest_rank query to now instead return the warmest_rank for each state, meaning your query should return the warmest temp/year for each state. Again, are the warmest temperatures more recent or historic for each state?
+
+SELECT state, year, tempc,
+  RANK() OVER (
+    PARTITION BY state
+    ORDER BY tempc DESC
+  ) as 'coldest_rank'
+FROM state_climate;
+
+
+-- Let’s now write a query that will return the average yearly temperatures in quartiles instead of in rankings for each state.
+
+
+SELECT
+  NTILE(4) OVER (
+    PARTITION BY state
+    ORDER BY AVG(tempc) ASC
+    ) as 'quartile',
+  year, state,
+  AVG(tempc) avg_yearly_temp
+FROM state_climate
+GROUP BY year, state;
+
+--Write a query that will return the average yearly temperatures in quintiles (5).
+--The top quintile should be the coldest years overall, not by state.
+
+SELECT
+  NTILE(5) OVER (
+    ORDER BY AVG(tempc) ASC
+    ) as 'quintile',
+  year, state,
+  AVG(tempc) avg_yearly_temp
+FROM state_climate
+GROUP BY year, state;
